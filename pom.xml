@@ -53,6 +53,21 @@
                             <appendAssemblyId>false</appendAssemblyId>
                         </configuration>
                     </execution>
+                    <execution>
+                        <id>client</id>
+                        <phase>package</phase>
+                        <goals><goal>single</goal></goals>
+                        <configuration>
+                            <archive>
+                                <manifest>
+                                    <mainClass>whatsut.client.PrincipalCliente</mainClass>
+                                </manifest>
+                            </archive>
+                            <descriptorRefs><descriptorRef>jar-with-dependencies</descriptorRef></descriptorRefs>
+                            <finalName>whatsut-client</finalName>
+                            <appendAssemblyId>false</appendAssemblyId>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
         </plugins>
