@@ -96,9 +96,9 @@ public class PainelLogin extends JPanel {
         JPanel painelConexao = new JPanel(new FlowLayout(FlowLayout.CENTER, 8, 0));
         painelConexao.setOpaque(false);
 
-        tfHost  = campoPequeno("localhost", 10);
-        tfPorta = campoPequeno("1099", 5);
-        JButton btnConectar = botaoArredondado("Conectar", ACCENT);
+        tfHost  = campoPequeno("localhost", 8);
+        tfPorta = campoPequeno("1099", 4);
+        JButton btnConectar = botaoArredondadoPequeno("Conectar", ACCENT);
         btnConectar.addActionListener(e -> conectar());
 
         painelConexao.add(rotulo("Host:", 12, Font.PLAIN, TEXT2));
@@ -106,6 +106,7 @@ public class PainelLogin extends JPanel {
         painelConexao.add(rotulo("Porta:", 12, Font.PLAIN, TEXT2));
         painelConexao.add(tfPorta);
         painelConexao.add(btnConectar);
+        painelConexao.setMaximumSize(new Dimension(Integer.MAX_VALUE, 44));
         card.add(painelConexao);
 
         card.add(Box.createVerticalStrut(16));
@@ -367,6 +368,32 @@ public class PainelLogin extends JPanel {
         btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         btn.setPreferredSize(new Dimension(200, 40));
         btn.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
+        return btn;
+    }
+
+    private JButton botaoArredondadoPequeno(String texto, Color bg) {
+        JButton btn = new JButton(texto) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                        RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(bg);
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 10, 10);
+                g2.dispose();
+                super.paintComponent(g);
+            }
+        };
+        btn.setForeground(Color.WHITE);
+        btn.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        btn.setFocusPainted(false);
+        btn.setContentAreaFilled(false);
+        btn.setBorderPainted(false);
+        btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        Dimension d = new Dimension(100, 28);
+        btn.setPreferredSize(d);
+        btn.setMaximumSize(d);
+        btn.setMinimumSize(d);
         return btn;
     }
 }
