@@ -4,6 +4,10 @@ import whatsut.client.ui.PainelChat;
 import whatsut.client.ui.PainelLogin;
 
 import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import javax.swing.*;
 import java.awt.*;
 
@@ -76,17 +80,48 @@ public class PrincipalCliente extends JFrame {
         } catch (Exception e) { /* padrão */ }
 
         // Necessário para que o servidor consiga chamar callbacks neste cliente.
-        // Usa o IP real da máquina para funcionar na rede local.
-        try {
-            String ipLocal = InetAddress.getLocalHost().getHostAddress();
-            System.setProperty("java.rmi.server.hostname", ipLocal);
-        } catch (Exception e) {
-            System.setProperty("java.rmi.server.hostname", "localhost");
-        }
+        // Em ambientes com várias interfaces (LAN + VPN como Radmin/Hamachi/ZeroTier)
+        // o IP retornado por getLocalHost() é da LAN e fica inalcançável pelo servidor
+        // remoto, o que faz os callbacks (lista de usuários online, novos grupos, etc.)
+        // falharem silenciosamente. Por isso pedimos ao usuário qual IP usar.
+        String ipEscolhido = escolherIpDeCallback();
+        System.setProperty("java.rmi.server.hostname", ipEscolhido);
 
         SwingUtilities.invokeLater(() -> {
             PrincipalCliente app = new PrincipalCliente();
             app.setVisible(true);
         });
+    }
+
+    private static String escolherIpDeCallback() {
+        List<String> ips = new ArrayList<>();
+        try {
+            for (NetworkInterface ni : Collections.list(NetworkInterface.getNetworkInterfaces())) {
+                if (!ni.isUp() || ni.isLoopback() || ni.isVirtual()) continue;
+                for (InetAddress addr : Collections.list(ni.getInetAddresses())) {
+                    if (addr.isLoopbackAddress() || addr instanceof java.net.Inet6Address) continue;
+                    ips.add(addr.getHostAddress() + "  (" + ni.getDisplayName() + ")");
+                }
+            }
+        } catch (Exception ignored) { }
+
+        if (ips.isEmpty()) {
+            try { return InetAddress.getLocalHost().getHostAddress(); }
+            catch (Exception e) { return "localhost"; }
+        }
+
+        String[] opcoes = ips.toArray(new String[0]);
+        String escolha = (String) JOptionPane.showInputDialog(
+                null,
+                "Selecione o IP local pelo qual o servidor irá te alcançar (callbacks).\n"
+                        + "Se você está conectando via Radmin/Hamachi/ZeroTier, escolha o IP da VPN.",
+                "Configurar IP do Cliente",
+                JOptionPane.QUESTION_MESSAGE,
+                null,
+                opcoes,
+                opcoes[0]);
+
+        if (escolha == null) System.exit(0);
+        return escolha.split("\\s")[0];
     }
 }
